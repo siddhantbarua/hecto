@@ -13,23 +13,30 @@ impl Editor {
 
     pub fn run(&self) {
         // terminal starts in canonical/cooked mode by default
-        enable_raw_mode().unwrap(); // unwrap uses the Ok value. Can cause panic.
+        if let Err(err) = self.repl() {
+            panic!("{err:#?}")
+        }
+
+        println!("Goodbye!");
+    }
+
+    fn repl(&self) -> Result<(), std::io::Error> {
+
+        enable_raw_mode()?;     // rep() signature allows us to unwrap without handling Err()
 
         loop {
-            match read() {
-                Ok(Key(event)) => {
-                    println!("{event:?} \r");
+            if let Key(event) = read()? {
+                println!("{event:?} \r");
 
-                    if let Char(c) = event.code{
-                        if c == 'q' {
-                            break;
-                        }
+                if let Char(c) = event.code{
+                    if c == 'q' {
+                        break;
                     }
-                },
-                Err(err) => println!("Error: {err}"),
-                _ => ()
-            };
-        };
-        disable_raw_mode().unwrap();
+                }
+            }
+        }
+
+        disable_raw_mode()?;
+        Ok(())
     }
 }
