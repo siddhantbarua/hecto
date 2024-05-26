@@ -1,29 +1,8 @@
-use std::io::{self, Read};
-use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
+#![warn(clippy::all, clippy::pedantic)]
+mod editor;
+use editor::Editor;
 
 fn main() {
-    // terminal starts in canonical/cooked mode by default
-    enable_raw_mode().unwrap(); // unwrap uses the Ok value. Can cause panic.
-
-    for b in io::stdin().bytes() {
-        match b {
-            Ok(b) => {
-                let c = b as char;
-                println!("{}", c);    
-
-                if c.is_control() {
-                    println!("Binary: {0:08b} ASCII: {0:#03} \r", b);
-                } else {
-                    println!("Binary: {0:08b} ASCII: {0:#03} Character: {1:#?}\r", b, c);
-                }
-
-                if c == 'q' {
-                    break;
-                } 
-            }
-            Err(err) => println!{"Error: {}", err}
-        };
-    }
-
-    disable_raw_mode().unwrap();
+    let editor = Editor::default();
+    editor.run();
 }
