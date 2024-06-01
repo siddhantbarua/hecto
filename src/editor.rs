@@ -6,7 +6,7 @@ use crossterm::{execute};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType};
 
 pub struct Editor {
-    should_quit: bool
+    should_quit: bool,
 }
 
 impl Editor {
@@ -17,6 +17,7 @@ impl Editor {
 
     pub fn run(&mut self) {
         Self::initialize().unwrap();
+        Self::draw_rows().unwrap();
         let result = self.repl();
         Self::terminate().unwrap();
 
@@ -27,7 +28,10 @@ impl Editor {
     fn initialize() -> Result<(), std::io::Error> {
         // terminal starts in canonical/cooked mode by default
         enable_raw_mode()?;
-        Self::clear_screen()
+        Self::clear_screen()?;
+        let mut stdout = stdout();
+
+        execute!(stdout, crossterm::cursor::MoveTo(0, 0))
     }
 
     fn terminate() -> Result<(), std::io::Error> {
@@ -77,5 +81,21 @@ impl Editor {
         }
     }
 
+    fn draw_rows() -> Result<(), std::io::Error>{
+        let mut stdout = stdout();
+        
+        let (_, rows) = crossterm::terminal::size()?;
+
+        for i in 0..rows {
+            print!("~");
+            if i < rows - 1 {
+                print!("\n\r");
+            }
+        }
+
+        execute!(stdout, crossterm::cursor::MoveTo(0, 0))?;
+
+        Ok(())
+    }
 
 }
